@@ -1,16 +1,13 @@
-FROM maven:3-jdk-11 as builder
-RUN mkdir -p /build
-WORKDIR /build
-COPY pom.xml /build
-COPY src /build/src
-RUN mvn clean package sonar:sonar
+FROM adoptopenjdk/openjdk11:alpine-jre
 
+# Refer to Maven build -> finalName
+ARG JAR_FILE=target/spring-boot-web.jar
 
-FROM openjdk:11-slim as runtime
-EXPOSE 8090
-#Set app home folder
-ENV APP_HOME /app
-RUN mkdir $APP_HOME
-WORKDIR $APP_HOME
-COPY --from=builder /build/target/*.jar app.jar
+# cd /opt/app
+WORKDIR /opt/app
+
+# cp target/spring-boot-web.jar /opt/app/app.jar
+COPY ${JAR_FILE} app.jar
+
+# java -jar /opt/app/app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
